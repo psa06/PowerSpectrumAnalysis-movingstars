@@ -670,6 +670,7 @@ if 0:
         lc1, arrow1=good_draw_LC([x[0],y[0],v[0],angle[0]], final_map, mjhd, err_mag_ml, (5*einstein_r_03)/8192 )
         lc2, arrow2 = good_draw_LC([x_dezoom[0], y_dezoom[0], v[0], angle[0]], final_map_2, mjhd, err_mag_ml, (20 * einstein_r_03) / 8192)
 
+        #Display of the trajectory in the map
         display_multiple_trajectory([arrow1,arrow2], map, map2)
         plt.plot(mjhd, lc1,label="zoom")
         plt.plot(mjhd, lc2, label = "dezoom")
@@ -677,12 +678,12 @@ if 0:
         plt.show()
         sys.exit()
 
+
         params = []
         params_2 = []
         for i, elem in enumerate(x):
             params.append([x[i], y[i], v[i], angle[i]])
             params_2.append([x_dezoom[i], y_dezoom[i], v[i], angle[i]])
-
 
         parrallel_power_spectrum = partial(power_spectrum,map= final_map, time=new_mjhd, err_data=new_err_mag_ml, f=1, cm_per_pxl = (5*einstein_r_03)/8192 )
         parrallel_power_spectrum_2 = partial(power_spectrum, map=final_map, time=new_mjhd, err_data=new_err_mag_ml, f=1,
@@ -756,10 +757,6 @@ if 0:
 
     ax.set(xlabel=r'Frequency (days$^{-1}$)', ylabel='Power', yscale='log',
            ylim=(min(power_spline[10:]), max(power_spline)))
-    ax.set_title(
-        r"Mean spectrum of %s curves. $R_{ref} = 1.62 \cdot 10^{15} cm$, found in Mosquera & Kochanek 2011"%(n_spectrum),
-        fontdict={'fontsize': 16})
-    # ax.set_title("Same curve with 100000 different realisation of the noise")
     ax.legend(prop={'size': 16})
     locs = ax.get_xticks()
     # locs[1] = frequency_spline[0]
