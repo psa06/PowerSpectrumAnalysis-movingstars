@@ -890,10 +890,12 @@ if 0:
     sys.exit()
 
 if 1:
+    # Plot of the map of chi^2 as function of radius and velocity
     os.chdir(resultdir + 'powerspectrum/pkl/M0.1/A2-B3_flattop')
     list_pkl = glob.glob("*.pkl")
-    #list_pkl= list_pkl+glob.glob("spectrum_A3-B2_100000_*_R*_schuster.pkl")
-    r_ref =15
+    r_ref =15 #Reference radius in pxl
+
+    # All the variables taht will be extracted from the name of the pkl file
     v_source = []
     reject_v_source=[]
     r0 = np.array([])
@@ -927,13 +929,10 @@ if 1:
     inv_unique = np.unique(inv)
     print z_unique
     print inv_unique
-    #weights = length/np.sum(length)
 
     for i,elem in enumerate(inv_unique):
-        #temp = np.average(all_chi[np.where(inv==elem)], weights = weights[np.where(inv==elem)])
         temp = np.average(all_chi[np.where(inv == elem)])
         if temp < maxchi:
-
             chi.append(temp)
             v_source.append(z_unique[i,1])
             r0= np.append(r0,z_unique[i,0])
@@ -948,26 +947,13 @@ if 1:
             reject_v_source.append(z_unique[i, 1])
             reject_r0= np.append(reject_r0,z_unique[i, 0])
 
-    #idx = np.argmin(chi)
     print chi
     print v_source
     print r0
-
-
-    X = np.arange(min(all_v),max(all_v),10)
-    Y = np.linspace(min(all_r0/r_ref), max(all_r0/r_ref), len(X))
-
-
-    #triang = tri.Triangulation(v_source, r0/20)
-    #interpolator = tri.LinearTriInterpolator(triang, chi)
-    #Xi, Yi = np.meshgrid(X, Y)
-    #zi = interpolator(Xi, Yi)
-
     print better_v
     print better_r0
+
     fig, ax = plt.subplots(1,1, figsize = (13,8))
-    #sc = ax.contour(X, Y, zi, color='RdBu')
-    #sc = ax.pcolor(X, Y, zi, cmap="Greens_r")
     sc = ax.scatter(v_source,r0/r_ref, c=chi, cmap = 'Greens_r')
     ax.plot(reject_v_source, reject_r0/r_ref, 'or', label = r"$\chi^2 > %s $"%(maxchi))
     ax.fill_between([110, 750], [1.7, 1.7], [6.7, 6.7], alpha = 0.3, label='Morgan et al.(2012)')
@@ -981,85 +967,3 @@ if 1:
     plt.show()
     #fig.savefig(resultdir+"powerspectrum/png/r0vsVvsChi2_FML0,9M0,3_wavy_flattop_A7-B3.png")
     sys.exit()
-
-
-
-
-fig, ax = plt.subplots(1, 1, figsize=(15, 5))
-inset = plt.axes([0.1, 1, 0.5, 1])
-ip = InsetPosition(ax, [0.2, 0.55, 0.45, 0.45])
-inset.set_axes_locator(ip)
-mark_inset(ax, inset, loc1=2, loc2=4, fc="none", ec='0.5')
-
-v_source = []
-r0 = []
-for elem in list_pkl:
-    print elem
-    v_source.append(int(elem.split('_')[3]))
-    r0.append(int(elem.split('.')[0].split('_')[4].split('R')[1]))
-
-
-sort = np.argsort(v_source)
-v_source = np.sort(v_source)
-r0 = np.sort(r0)
-list_pkl = [list_pkl[i] for i in sort]
-for i,elem in enumerate(list_pkl):
-    mean_power, var_power, freq = pkl.load(open(elem, 'rb'))
-    var_power = np.array(var_power[1:])
-    mean_power= np.array(mean_power[1:])
-
-    new_f = frequency_spline[frequency_spline <= 0.2]
-    new_mean_power = mean_power[frequency_spline <= 0.2]
-    new_var_power = var_power[frequency_spline <= 0.2]
-
-    ax.plot(new_f, new_mean_power, "--", label=r"$R_0$ = %s $R_{ref}$ ; v = %s km/s"%(round(r0[i]/20,1), v_source[i]))
-    ax.fill_between(new_f, np.add(new_mean_power, np.sqrt(new_var_power)),
-                    new_mean_power, alpha = 0.3)
-    f_cut = frequency_spline[frequency_spline<=0.02]
-    p_cut = mean_power[frequency_spline<=0.02]
-    var_cut = var_power[frequency_spline<=0.02]
-
-    inset.plot(f_cut, p_cut, '--')
-    inset.fill_between(f_cut, np.add(p_cut, np.sqrt(var_cut)),
-                       p_cut, alpha=0.3)
-
-new_power_spline=power_spline[frequency_spline <= 0.2]
-
-data_cut = power_spline[frequency_spline<=0.02]
-ax.plot(new_f, new_power_spline, "-r", label="Data's spectrum")
-inset.plot(f_cut, data_cut, "-r")
-
-inset.set(yscale = 'log')
-
-ax.set(xlabel=r'Frequency (days$^{-1}$)',ylabel = 'Power', yscale='log', ylim = (min(power_spline[10:]), max(power_spline)))
-ax.set_title(r"Mean spectrum of 50000 curves. $R_{ref} = 1.62 \cdot 10^{15} cm$, found in Mosquera & Kochanek 2011", fontdict={'fontsize':16})
-#ax.set_title("Same curve with 100000 different realisation of the noise")
-ax.legend(prop={'size':16})
-locs = ax.get_xticks()
-#locs[1] = frequency_spline[0]
-
-temp_lab = ax.get_xticklabels()
-lab = np.divide(1, locs).astype(int)
-labels = []
-for i, elem in enumerate(lab[1:-1]):
-    labels.append('$\\frac{{{:2.0f}}}{{{:2.0f}}}$'.format(1, int(elem)))
-
-labels[0]='0'
-ax.set_xticks(locs[1:-1], minor=False)
-ax.set_xticklabels(labels, minor = False)
-
-locs2 = inset.get_xticks()
-#locs2[1] = frequency_spline[0]
-temp_lab = inset.get_xticklabels()
-lab2 = np.divide(1, locs2).astype(int)
-labels = []
-for i, elem2 in enumerate(lab2[1:-1]):
-    labels.append('$\\frac{{{:2.0f}}}{{{:2.0f}}}$'.format(1, int(elem2)))
-
-labels[0] = '0'
-inset.set_xticks(locs2[1:-1], minor=False)
-inset.set_xticklabels(labels, minor=False)
-inset.set_ylim(min(power_spline[10:]), max(power_spline))
-fig.savefig(resultdir+"J0158andRXJ1131.png")
-with open(resultdir + 'powerspectrum/pkl/spectrum_J0158_RXJ1131.pkl','wb') as handle:
-    pkl.dump((power_spline, frequency_spline, power_spline_2, frequency_spline_2), handle, protocol=pkl.HIGHEST_PROTOCOL)
