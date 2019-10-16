@@ -22,7 +22,7 @@ import matplotlib.tri as tri
 execfile('useful_functions.py')
 
 
-#Useful paths
+#Useful paths :
 datadir = "/home/epaic/Documents/Astro/TPIVb/data/"
 scriptdir = "/home/epaic/Documents/Astro/TPIVb/script/"
 resultdir = "/home/epaic/Documents/Astro/TPIVb/results/"
